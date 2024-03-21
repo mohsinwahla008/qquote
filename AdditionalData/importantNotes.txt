@@ -1,5 +1,6 @@
 1-A Method to fetch values from another function Using sessionStorage.setItem
 await driver.executeScript(`sessionStorage.setItem('totalPrice',${totalPrice})`)
+let totalPriceString = await driver.executeScript('return sessionStorage.getItem("totalPrice")');
 ================================================================================
 2- Colors for Console
 console.log('\x1b[31m red text \x1b[0m');
@@ -8,3 +9,21 @@ const Blue = "\u001b[34m";
 const Green = "\u001b[32m";
 console.log(Green+ "I am Green");
 ======================================================================
+getting text and copying to clipboard
+// Find the element from which you want to get the text
+const element = driver.findElement(By.css('Your CSS Selector'));
+
+// Get the text from the element
+element.getText().then(text => {
+    // Copy the text to the clipboard
+    navigator.clipboard.writeText(text).then(() => {
+        console.log('Text copied to clipboard:', text);
+    }).catch(error => {
+        console.error('Error copying text to clipboard:', error);
+    });
+}).catch(error => {
+    console.error('Error getting text from element:', error);
+});
+===========================================================================================
+                                          FOR SCROlling
+ await driver.executeScript('arguments[0].scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });', targetElement
