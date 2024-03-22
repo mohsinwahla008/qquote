@@ -50,7 +50,7 @@ async function markAvailablity4(driver){
     //Setting the Quantity 
     let priceQuantity4 = await driver.findElement(By.css("#quantity"));
     priceQuantity4.sendKeys(Key.CONTROL, "a");
-    priceQuantity4.sendKeys(Key.BACK_SPACE,"2");
+    priceQuantity4.sendKeys(Key.BACK_SPACE,"6");
     await driver.sleep(3000)
     //Clicking on any element to change the price after changing the quantity
     await driver.findElement(By.css("body")).click();
@@ -325,10 +325,10 @@ await driver.sleep(4000)
         let screen3 = await thirdScreen(driver)
 
         if(screen1==screen2 && screen2==screen3){
-            console.log("\n \n Major Test Case: \n Title: Compare Prices from All three Screens/Pages: \n\nPrices matched in All Three Screens:   Test is Passed!"+Green);
+            console.log("\n \n Major Test Case: \n Title: Compare Prices from All three Screens/Pages: \n\nPrices matched in All Three Screens:"  ,Green+ "Test is Passed!");
         }
         else {
-            console.log("\n \n Major Test Case: \n Title: Compare Prices from All three Screens/Pages: \n\nPrices did not match:   Test is failed."+Red);
+            console.log("\n \n Major Test Case: \n Title: Compare Prices from All three Screens/Pages: \n\nPrices did not match: " ,Red+ "Test is failed.");
         } 
 
         
