@@ -1,0 +1,5 @@
+git status
+git add <file1> <file2> ...
+git commit -m "Your commit message here"
+git push origin <branch_name>
+===============================
