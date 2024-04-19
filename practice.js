@@ -1,88 +1,94 @@
-const { Builder, Browser, By, Key, until, Actions } = require('selenium-webdriver');
-const { Workbook } = require('exceljs');
-const { createWorker } = require('tesseract.js');
-//Winter Tires Module Task 2
+//Multiple Rows to be BOld
+const boldRows = [5, 6];
+boldRows.forEach((rowIndex) => {
+    worksheet.getRow(rowIndex).eachCell((cell) => {
+        cell.font = { bold: true };
+    });
+});
 
-const Green = "\u001b[32m";
-const Red = "\u001b[31m";
+const { Builder, By, Key } = require('selenium-webdriver');
+const { Browser } = require('selenium-webdriver/lib/capabilities');
+const path = require('path');
+
 async function login(driver) {
-    await driver.manage().setTimeouts({ implicit: 2000 });
+    await driver.manage().setTimeouts({ implicit: 5000 });
+
     await driver.navigate().to('https://dev.qquote.com/login');
-    // await driver.manage().window().maximize();
-    await driver.manage().window().setSize(1280,720)
     await driver.manage().window().maximize();
-    await driver.sleep(3000);
     
-
     const emailInput = await driver.findElement(By.css("input[name='email']"));
-    await driver.actions().sendKeys(emailInput, "testermashkraft@gmail.com").perform();
-    await driver.sleep(200);
-
-    const passwordInput = await driver.findElement(By.css("input[name='password']"));
-    await driver.actions().sendKeys(passwordInput, "12345678").perform();
-    await driver.sleep(200);
-
-    const loginButton = await driver.findElement(By.id("submit"));
-    await driver.actions().click(loginButton).perform();
-    await driver.sleep(2000);
-    //Winter Tire Module
-    const clickModule = await driver.findElement(By.css("img[src='./assets/assets/dist/images/single_tyre_icon.png']"));
-    await driver.actions().click(clickModule).perform();
-    await driver.sleep(4000);
-}
-
-async function SearchTireBySize(driver){
-    const searchTireButton  = await driver.findElement(By.css("input[id='tire_size']"));
-    await searchTireButton.sendKeys("215/65R17");
-    await driver.sleep(1000);
-    let submitQuote= await driver.findElement(By.id("submit_btn"));
-    await submitQuote.click();
-    await driver.sleep(3000);
-}
-
-async function getTextFromImage(imageUrl) {
-    // Create a Tesseract.js worker
-    const worker = createWorker();
-
-    try {
-        // Initialize the worker
-        await worker.load();
-        await worker.loadLanguage('eng');
-        await worker.initialize('eng');
-
-        // Perform OCR on the image
-        const { data: { text } } = await worker.recognize(imageUrl);
-        console.log('Text extracted from the image:', text);
-
-        // Close the worker
-        await worker.terminate();
-
-        return text;
-    } catch (error) {
-        console.error('Error:', error);
-        return null;
-    }
-}
-
-// Example usage
-(async function example() {
-    // Create a new WebDriver instance
-    let driver = await new Builder().forBrowser('chrome').build();
+    await emailInput.sendKeys("testermashkraft@gmail.com");
     
+    const passwordInput = await driver.findElement(By.css("input[name='password']"));
+    await passwordInput.sendKeys("12345678");
+    
+    const loginButton = await driver.findElement(By.id("submit"));
+    await loginButton.click();
+    
+    const clickModule = await driver.findElement(By.css("img[src='./assets/assets/dist/images/multi_tyres_icon.png']"));
+    await clickModule.click();
+    
+    await driver.manage().setTimeouts({ implicit: 0 });
+}
+
+async function openGmailAndLogin(driver) {
+    await driver.executeScript("window.open()");
+    const tabs = await driver.getAllWindowHandles();
+    await driver.switchTo().window(tabs[tabs.length - 1]);
+    await driver.get('https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&emr=1&followup=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&ifkv=ARZ0qKJqVh6zc4IFxbNvk81vvhXMBFCNJ2lqqtjb4uSlEthaPYZRb6M6QqeZ-GkRZmB4XOhC4tG1&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S-553420191%3A1713530682138979&theme=mn&ddm=0');
+
+    // Gmail login
+    const emailInput = await driver.findElement(By.css('#identifierId'));
+    await emailInput.sendKeys('mohsinishfaq.mashkraft@gmail.com', Key.RETURN);
+    await driver.sleep(2000);
+    let nextButton = await driver.findElement(By.css("button[class='VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-k8QpJ VfPpkd-LgbsSe-OWXEXe-dgl2Hf nCP5yc AjY5Oe DuMIQc LQeN7 BqKGqe Jskylb TrZEUc lw1w4b'] span[class='VfPpkd-vQzf8d']"));
+    await nextButton.click();
+
+
+    const passwordInput = await driver.findElement(By.css("input[name='Passwd']"));
+    await passwordInput.sendKeys('12345', Key.RETURN);
+    await driver.sleep(3000); // Wait for Gmail to load
+    
+
+    // After logging in, you can proceed with fetching the email
+}
+
+async function fetchEmail(driver) {
+    // Example: Open the first email and extract the link
+    const firstEmail = await driver.findElement(By.xpath('//div[@role="tabpanel"]//span[contains(text(),"Your email subject")]'));
+    await firstEmail.click();
+    await driver.sleep(2000); // Wait for the email to open
+
+    const emailContent = await driver.findElement(By.xpath('//div[contains(@class, "a3s")]'));
+    const emailText = await emailContent.getText();
+    
+    // Extract the link from the email content
+    const linkRegex = /https?:\/\/[^\s]+/;
+    const linkMatch = emailText.match(linkRegex);
+    const link = linkMatch ? linkMatch[0] : null;
+
+    return link;
+}
+
+(async function example() {
+    let driver = await new Builder().forBrowser(Browser.CHROME).build();
     try {
-      await login(driver);
-      await SearchTireBySize(driver);
-    //   const exportDealer = await dealershipName(driver)
-    //   const exportTireSize= await tireSize(driver);
-    //   const exportTotalPrice = await totalPrice(driver)
-    //   await exportToExcel(exportDealer,exportTireSize,exportTotalPrice);
-    const imageUrl = 'https://d1gtiet8v4nxan.cloudfront.net/uploads/manufacturers/1519628962.png?v=5185'; // Replace with the URL of your image
-    getTextFromImage(imageUrl);
-  
-    } catch (error) {
-      console.error('Error:', error);
+        // Login to the dashboard
+        await login(driver);
+        
+        // Open Gmail and login
+        await openGmailAndLogin(driver);
+
+        // Fetch and extract the link from the email
+        const link = await fetchEmail(driver);
+        if (link) {
+            // Perform actions with the link (e.g., navigate to URL, fetch data)
+            console.log('Link:', link);
+        } else {
+            console.log('No link found in the email.');
+        }
     } finally {
-      // Close the WebDriver session
-      await driver.quit();
+        // Close the WebDriver instance
+        await driver.quit();
     }
-  })();
+})();

@@ -33,7 +33,7 @@ async function login(driver) {
 
 async function SearchTireBySize(driver){
     const searchTireButton  = await driver.findElement(By.css("input[id='tire_size']"));
-    await searchTireButton.sendKeys("215/65/16");
+    await searchTireButton.sendKeys("215/65/17");
     await driver.sleep(1000);
     let submitQuote= await driver.findElement(By.id("submit_btn"));
     await submitQuote.click();
@@ -49,6 +49,12 @@ async function markAvailRadio(driver){
   await driver.sleep(2000)
   
     
+}
+async function settingUpQtyFunc(driver){
+  let priceQuantity4 = await driver.findElement(By.css("#quantity"));
+    priceQuantity4.sendKeys(Key.CONTROL, "a");
+    priceQuantity4.sendKeys(Key.BACK_SPACE,"6");
+    await driver.sleep(3000)
 }
 async function checkBoxFunc(driver){
     let Chechbox2  = await driver.findElement(By.css("body > div:nth-child(16) > div:nth-child(1) > form:nth-child(2) > div:nth-child(6) > div:nth-child(5) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > span:nth-child(1) > div:nth-child(1) > ins:nth-child(2)"));
@@ -218,6 +224,7 @@ async function upSellItemsFunc(driver){
   
     await driver.sleep(3000)
     await driver.executeScript(`sessionStorage.setItem('quoteIdParsed',${quoteIdParsed})`);
+    await driver.executeScript(`sessionStorage.setItem('parsedGrandTotal',${parsedGrandTotal})`);
     return parsedGrandTotal;
   }
 //=============================================================================//
@@ -363,6 +370,7 @@ async function upSellItemsFuncSaved(driver){
     let superGrandTotalSaved = parsedFinalProSaved+parsedFinalFedSaved+parsedSubtotal2Saved;
     let parsedSuperGrandTotalSaved = parseFloat(superGrandTotalSaved);
     console.log("Grand Total in Saved ", parsedSuperGrandTotalSaved);
+    await driver.executeScript(`sessionStorage.setItem('parsedSuperGrandTotalSaved',${parsedSuperGrandTotalSaved})`);
     return parsedSuperGrandTotalSaved;
 
   }
@@ -519,6 +527,7 @@ async function upSellFuncSent(driver){
     let superGrandTotalSent = parsedFinalProSent+parsedFinalFedSent+parsedSubtotal2Sent;
     let parsedSuperGrandTotalSent = parseFloat(superGrandTotalSent);
     console.log("Grand Total in Sent Quote ", parsedSuperGrandTotalSent);
+    await driver.executeScript(`sessionStorage.setItem('parsedSuperGrandTotalSent',${parsedSuperGrandTotalSent})`);
     return parsedSuperGrandTotalSent;
 
   }
@@ -541,12 +550,92 @@ async function upSellFuncSent(driver){
     console.log("Subtotal-1 in quote sent price for comparison ", fetchedSubSentCom);
     //comparison starts here
     let resultOfSub1 = (fetchedSub1DetailsCom===fetchedSubSavedCom && fetchedSubSavedCom===fetchedSubSentCom) ?
-    "Test Passed, Prices Match" : "Test Failed , Prices Do not Match"
+    "Passed!" : "Failed!"
       console.log(resultOfSub1);
       return resultOfSub1;
     
 
 }
+//                    ADD Ons Price Comparison
+
+async function addOnsPriceComp(driver){
+    //Quote Details Module
+    let addOnsDetailsComp = await driver.executeScript('return sessionStorage.getItem("parsedAddOnInput")');
+    let fetchedAddOnsDetailsComp = parseFloat(addOnsDetailsComp)
+    console.log("Fetched Add Ons Price Details ", fetchedAddOnsDetailsComp);
+    // Quote Saved Module
+    let addOnsSavedComp = await driver.executeScript('return sessionStorage.getItem("parsedAddOnInputSaved")');
+    let fetchedAddOnsSavedComp = parseFloat(addOnsSavedComp);
+    console.log("Fetched Add Ons Price Saved ", fetchedAddOnsSavedComp);
+    //Quote Sent Module 
+    let addOnsSentComp = await driver.executeScript('return sessionStorage.getItem("parsedAddOnInputSent")');
+    let fetchedAddOnsSentComp = parseFloat(addOnsSentComp);
+    console.log("Fetched add ons price Sent ", fetchedAddOnsSentComp);
+    //Comparison
+    let resultOfAddOns = (fetchedAddOnsDetailsComp===fetchedAddOnsSavedComp && fetchedAddOnsSavedComp===fetchedAddOnsSentComp) ?
+    "Passed!" : "Failed!"
+    console.log("Result of Add Ons", resultOfAddOns);
+    return resultOfAddOns;
+  }
+  //                Upsell Price Comparison
+  // Upsell Details Quote Module
+  async function upSellPriceComparison(driver){
+    //Details Quote Module
+    let upSellDetailsComp = await driver.executeScript('return sessionStorage.getItem("additionOfUpSell")');
+    let fetchedUpSellDetailsComp = parseFloat(upSellDetailsComp);
+    console.log("UpSell Items Price Details ", fetchedUpSellDetailsComp);
+    //Saved Quote Module
+    let upSellSavedComp = await driver.executeScript('return sessionStorage.getItem("additionOfUpSellSavedQuote")');
+    let fetchedUpSellSavedComp = parseFloat(upSellSavedComp);
+    console.log("UpSell Items Price Saved ", fetchedUpSellSavedComp);
+    //Sent Quote Module
+    let upSellSentComp = await driver.executeScript('return sessionStorage.getItem("additionOfUpSellSentQuote")');
+    let fetchedUpSellSentComp = parseFloat(upSellSentComp);
+    console.log("UpSell Items Price Sent ", fetchedUpSellSentComp);
+    //Comparison
+    let resultOfUpSell = (fetchedUpSellDetailsComp===fetchedUpSellSavedComp && fetchedUpSellSavedComp===fetchedUpSellSentComp) ?
+    "Passed!" : "Failed!"
+    console.log("Result for UpSell Items ", resultOfUpSell);
+    return resultOfUpSell;
+  }
+  // Subtotal-2 Price comparison
+  async function subtotal2Comparison(driver){
+    let subtotal2DetailsComp = await driver.executeScript('return sessionStorage.getItem("grandTotal")');
+    let fetchedSubtotal2DetailsComp = parseFloat(subtotal2DetailsComp);
+    console.log("Subtotal-2 Details Price ", fetchedSubtotal2DetailsComp);
+    //Saved Quote Module
+    let subtotal2SavedComp = await driver.executeScript('return sessionStorage.getItem("grandTotalSaved")');
+    let fetchedSubtotal2SavedComp = parseFloat(subtotal2SavedComp);
+    console.log("Subtotal-2 Saved Price ", fetchedSubtotal2SavedComp);
+    //Sent Quote Module
+    let subtotal2SentComp =await driver.executeScript('return sessionStorage.getItem("subtotal2TotalSent")');
+    let fetchedSubtotal2SentComp = parseFloat(subtotal2SentComp);
+    console.log("Subtotal-2 Sent Price ", fetchedSubtotal2SentComp);
+    //comparison 
+    let resultOfSub2 = (fetchedSubtotal2DetailsComp===fetchedSubtotal2SavedComp && fetchedSubtotal2SavedComp===fetchedSubtotal2SentComp) ?
+    "Passed!" : "Failed!"
+    console.log("Result Subtotal-2 ", resultOfSub2);
+    return resultOfSub2;
+  }
+  //Grand Final Price Comparison
+  async function grandPriceComparison(driver){
+    let grandPriceDetailsComp = await driver.executeScript('return sessionStorage.getItem("parsedGrandTotal")');
+    let fetchedGrandDetailsComp = parseFloat(grandPriceDetailsComp);
+    console.log("Grand price Details ", fetchedGrandDetailsComp);
+    //Saved Quote Module
+    let grandPriceSavedComp =await driver.executeScript('return sessionStorage.getItem("parsedSuperGrandTotalSaved")');
+    let fetchedGrandSavedComp = parseFloat(grandPriceSavedComp);
+    console.log("Grand Saved Price ", fetchedGrandSavedComp);
+    //Sent Quote Module
+    let grandPriceSentComp =await driver.executeScript('return sessionStorage.getItem("parsedSuperGrandTotalSent")');
+    let fetchedGrandSentComp = parseFloat(grandPriceSentComp);
+    console.log("Grand Sent Price ", fetchedGrandSentComp);
+    //comparison 
+    let resultOfGrandPrice = (fetchedGrandDetailsComp===fetchedGrandSavedComp && fetchedGrandSavedComp===fetchedGrandSentComp) ?
+    "Passed!" : "Failed!"
+    console.log("Result Grand  ", resultOfGrandPrice);
+    return resultOfGrandPrice;
+  }
 
 
 
@@ -556,7 +645,8 @@ async function upSellFuncSent(driver){
 async function exportToExcel(dealershipName,tireSize,tireBrandFunc,partNumberFunc,unitQuantityFunc, totalPrice,
   upSellItemsFunc,addOnsFunc,grandTotalFunc, pfTaxesFunc,quoteSavedScreen, additionOfUpSellSavedQuote,parsedAddOnInputSaved,
   grandTotalSaved,pfSuperGrandSavedFunc,sentQuoteBtnFunc,upSellFuncSent,addOnsFuncSent,subTotal2SentFunc
-  ,pfGrandPriceSent,subtotal1Comparison) 
+  ,pfGrandPriceSent,subtotal1Comparison,addOnsPriceComp,upSellPriceComparison,
+  subtotal2Comparison,grandPriceComparison) 
 
 {
   const workbook = new Workbook();
@@ -572,10 +662,10 @@ async function exportToExcel(dealershipName,tireSize,tireBrandFunc,partNumberFun
   worksheet.addRow(['', '','', '']);
   worksheet.addRow(['', 'Quote Details','Saved Quote', 'Sent Quote', 'Actual Result']);
   worksheet.addRow(['Subtotal-1', totalPrice,quoteSavedScreen,sentQuoteBtnFunc,subtotal1Comparison]);
-  worksheet.addRow(['Add Ons', addOnsFunc,parsedAddOnInputSaved,addOnsFuncSent])
-  worksheet.addRow(['Upsell', upSellItemsFunc,additionOfUpSellSavedQuote,upSellFuncSent]);
-  worksheet.addRow(['Subtotal-2', grandTotalFunc,grandTotalSaved,subTotal2SentFunc])
-  worksheet.addRow(['Grand Total', pfTaxesFunc,pfSuperGrandSavedFunc,pfGrandPriceSent])
+  worksheet.addRow(['Add Ons', addOnsFunc,parsedAddOnInputSaved,addOnsFuncSent,addOnsPriceComp])
+  worksheet.addRow(['Upsell', upSellItemsFunc,additionOfUpSellSavedQuote,upSellFuncSent,upSellPriceComparison]);
+  worksheet.addRow(['Subtotal-2', grandTotalFunc,grandTotalSaved,subTotal2SentFunc,subtotal2Comparison])
+  worksheet.addRow(['Grand Total', pfTaxesFunc,pfSuperGrandSavedFunc,pfGrandPriceSent,grandPriceComparison])
 
   worksheet.columns.forEach(column => {
     if (column.header) {
@@ -595,7 +685,7 @@ async function exportToExcel(dealershipName,tireSize,tireBrandFunc,partNumberFun
   const randomDigit = generateRandomDigit();
 
   // const timestamp = new Date().toISOString().replace(/:/g, '-');
-  const fileName = `dealerships_${randomDigit}.xlsx`;
+  const fileName = `testResult_${randomDigit}.xlsx`;
   
   // Save workbook
   const filePath = path.join(__dirname,folderName,fileName);
@@ -612,6 +702,7 @@ async function exportToExcel(dealershipName,tireSize,tireBrandFunc,partNumberFun
     await login(driver);
     await SearchTireBySize(driver);
     await markAvailRadio(driver);
+    await settingUpQtyFunc(driver);
     await checkBoxFunc(driver);
     // Exporting Data
     const exportDealer = await dealershipName(driver);
@@ -640,11 +731,17 @@ async function exportToExcel(dealershipName,tireSize,tireBrandFunc,partNumberFun
     const exportGrandTotalSent = await pfGrandPriceSent(driver);
     //Subtotal-1 Price Comparison
     const exportSubTotal1Comp = await subtotal1Comparison(driver);
+    const exportAddOnsComp = await addOnsPriceComp(driver);
+    const exportUpSellComp = await upSellPriceComparison(driver);
+    const exportSubTotal2Comp = await subtotal2Comparison(driver);
+    const exportGrandPComp = await grandPriceComparison(driver);
     await exportToExcel(exportDealer,exportTireSize,exportTireBrand,
       exportPartNumber,exportQuantity, exportTotalPrice, exportUpSell,
       exportAddOns, exportGrandTotal,exportSubtotalPlusTaxes, exportSavedSubtotal,exportUpSellSaved,exportAddOnsSaved,
       exportGrandTotalSaved,exportSuperGrandTotal,exportSubtotal1Sent,exportUpSellSent
-      ,exportAddOnsSent,exportSubtotal2Sent,exportGrandTotalSent,exportSubTotal1Comp);
+      ,exportAddOnsSent,exportSubtotal2Sent,exportGrandTotalSent,exportSubTotal1Comp
+      , exportSubTotal1Comp,exportUpSellComp,exportAddOnsComp,exportSubTotal2Comp,
+      exportGrandPComp);
 
   } catch (error) {
     console.error('Error:', error);
